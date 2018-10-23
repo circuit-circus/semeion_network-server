@@ -1,6 +1,6 @@
 // controller.js
 const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://broker.hivemq.com')
+const client = mqtt.connect('mqtt://localhost');
 
 var stdin = process.openStdin();
 
@@ -10,7 +10,7 @@ client.on('connect', () => {
   client.subscribe('sem_client/connect');
   client.subscribe('sem_client/disconnect');
   client.subscribe('sem_client/state');
-})
+});
 
 client.on('message', (topic, message) => {
   switch (topic) {
@@ -49,7 +49,6 @@ function handleSemClientState (message) {
   console.log('Client ' + clientStateInfo.clientInfo.name + ' updated its state to %s', clientStateInfo.clientState + '. I will now tell the others.');
   client.publish('sem_client/other_state', clientStateInfo.clientState);
 }
-
 
 // --- For Demo Purposes Only ----//
 

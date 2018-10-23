@@ -1,14 +1,15 @@
 {
-  "name": "semeionserver",
+  "name": "semeion_server",
   "version": "1.0.0",
   "description": "Server for communication on the semeion network",
-  "main": "app.js",
+  "main": "broker.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node broker.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mosca": "^2.8.3",
     "mqtt": "^2.18.8",
     "nodemon": "^1.18.4",
     "ws": "^6.1.0"
