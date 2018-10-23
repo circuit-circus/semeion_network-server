@@ -2,8 +2,6 @@
 const mqtt = require('mqtt')
 const client = mqtt.connect('mqtt://localhost');
 
-var stdin = process.openStdin();
-
 var connectedSemClients = [];
 
 client.on('connect', () => {
@@ -50,16 +48,4 @@ function handleSemClientState (message) {
   client.publish('sem_client/other_state', clientStateInfo.clientState);
 }
 
-// --- For Demo Purposes Only ----//
-
-// simulate opening sem_client door
-// setTimeout(() => {
-//   console.log('Send idle')
-//   setToIdle()
-// }, 5000)
-
-// // simulate closing sem_client door
-// setTimeout(() => {
-//   console.log('Send shocked')
-//   setToShocked()
-// }, 20000)
+module.exports.controller = client;

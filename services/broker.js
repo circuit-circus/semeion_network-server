@@ -16,12 +16,12 @@ var settings = {
 var server = new mosca.Server(settings);
 
 server.on('clientConnected', function(client) {
-    console.log('client connected', client.id);
+    console.log('BROKER: Client connected: ' + client.id);
 });
 
 // fired when a message is received
 server.on('published', function(packet, client) {
-  console.log('Published', packet.payload);
+  //console.log('Published', packet.payload);
 });
 
 server.on('ready', setup);
@@ -30,3 +30,5 @@ server.on('ready', setup);
 function setup() {
   console.log('Mosca server is up and running');
 }
+
+module.exports.broker = server;
