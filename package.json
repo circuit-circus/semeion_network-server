@@ -1,0 +1,16 @@
+{
+  "name": "semeionserver",
+  "version": "1.0.0",
+  "description": "Server for communication on the semeion network",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^2.18.8",
+    "nodemon": "^1.18.4",
+    "ws": "^6.1.0"
+  }
+}
