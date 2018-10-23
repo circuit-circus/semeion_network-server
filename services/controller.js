@@ -38,7 +38,18 @@ function handleSemClientConnected (message) {
 }
 
 function handleSemClientDisconnected (message) {
-  console.log('Someone is disconnecting');
+  var disconnectedClient = JSON.parse(message.toString());
+  console.log(disconnectedClient.name + ' is disconnecting.');
+
+  // Check if its in the connected array and delete it
+  let existingClient = connectedSemClients.find(x => x.name === disconnectedClient.name);
+  if(existingClient && existingClient != undefined) {
+    let index = connectedSemClients.indexOf(existingClient);
+    connectedSemClients.splice(index, index+1); // Remove from array
+  }
+
+  console.log('Now I have:');
+  console.log(connectedSemClients);
 }
 
 function handleSemClientState (message) {
