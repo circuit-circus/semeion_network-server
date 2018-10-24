@@ -8,6 +8,7 @@ client.on('connect', () => {
   client.subscribe('sem_client/connect');
   client.subscribe('sem_client/disconnect');
   client.subscribe('sem_client/state');
+  client.subscribe('sem_client/data');
 });
 
 client.on('message', (topic, message) => {
@@ -17,12 +18,14 @@ client.on('message', (topic, message) => {
     case 'sem_client/disconnect':
       return handleSemClientDisconnected(message);
     case 'sem_client/state':
-      return handleSemClientState(message)
+      return handleSemClientState(message);
+    case 'sem_client/data':
+      return handleSemClientData(message);
   }
-  console.log('No handler for topic %s', topic)
+  console.log('No handler for topic %s', topic);
 });
 
-function handleSemClientConnected (message) {
+function handleSemClientConnected(message) {
   var newClient = JSON.parse(message.toString());
 
   let existingClient = connectedSemClients.find(x => x.name === newClient.name);
@@ -37,7 +40,7 @@ function handleSemClientConnected (message) {
   console.log(connectedSemClients);
 }
 
-function handleSemClientDisconnected (message) {
+function handleSemClientDisconnected(message) {
   var disconnectedClient = JSON.parse(message.toString());
   console.log(disconnectedClient.name + ' is disconnecting.');
 
@@ -52,11 +55,16 @@ function handleSemClientDisconnected (message) {
   console.log(connectedSemClients);
 }
 
-function handleSemClientState (message) {
+function handleSemClientState(message) {
   var clientStateInfo = JSON.parse(message.toString());
 
   console.log('Client ' + clientStateInfo.clientInfo.name + ' updated its state to %s', clientStateInfo.clientState + '. I will now tell the others.');
   client.publish('sem_client/other_state', clientStateInfo.clientState);
+}
+
+function handleSemClientData(message) {
+  var clientDataInfo = JSON.parse(message.toString());
+  console.log('Got data from ' + clientDataInfo.clientInfo.name + '. It is: ' + clientDataInfo.clientData);
 }
 
 module.exports.controller = client;
