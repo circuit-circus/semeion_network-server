@@ -5,10 +5,16 @@ const client = mqtt.connect('mqtt://localhost');
 var connectedSemClients = [];
 
 client.on('connect', () => {
-  client.subscribe('sem_client/connect');
+  console.log('Controller client connected');
+  client.subscribe('sem_client/connect', {qos: 1}, function (err, granted) {
+    console.log(err);
+    console.log(granted);
+  });
   client.subscribe('sem_client/disconnect');
   client.subscribe('sem_client/state');
   client.subscribe('sem_client/data');
+
+  //client.publish('controller/connect', '');
 });
 
 client.on('message', (topic, message) => {
