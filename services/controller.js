@@ -1,23 +1,27 @@
 // controller.js
 const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://localhost');
+const controller = mqtt.connect('mqtt://localhost');
 
 var connectedSemClients = [];
 
-client.on('connect', () => {
-  console.log('Controller client connected');
-  client.subscribe('sem_client/connect', {qos: 1}, function (err, granted) {
-    console.log(err);
-    console.log(granted);
-  });
-  client.subscribe('sem_client/disconnect');
-  client.subscribe('sem_client/state');
-  client.subscribe('sem_client/data');
-
-  //client.publish('controller/connect', '');
+/**
+ * Handler for when the controller connects to the broker.
+ * Subscribes to the listed channels
+ */
+controller.on('connect', () => {
+  console.log('Controller connected to broker');
+  
+  controller.subscribe('sem_client/connect');
+  controller.subscribe('sem_client/disconnect');
+  controller.subscribe('sem_client/state');
+  controller.subscribe('sem_client/data');
 });
 
-client.on('message', (topic, message) => {
+/**
+ * Handler for when the controller receives a message
+ * Goes through the possible options and handles them accordingly
+ */
+controller.on('message', (topic, message) => {
   switch (topic) {
     case 'sem_client/connect':
       return handleSemClientConnected(message);
@@ -31,14 +35,22 @@ client.on('message', (topic, message) => {
   console.log('No handler for topic %s', topic);
 });
 
-function handleSemClientConnected(message) {
+/**
+ * Handles when a semclient connects to the system.
+ * Adds its id to an array of connected clients
+ *
+ * @param message The message from the semclient, containing its name 
+ */
+function handleSemClientConnected (message) {
   var newClient = JSON.parse(message.toString());
 
-  let existingClient = connectedSemClients.find(x => x.name === newClient.name);
-  if(existingClient && existingClient != undefined) {
-    let index = connectedSemClients.indexOf(existingClient);
-    connectedSemClients[index] = newClient;
+  // Check if we already have the client registered
+  if(checkExistingClient(newClient)) {
+    // If yes, replace it with the new instance
+    let indexOfExisting = connectedSemClients.indexOf(newClient);
+    connectedSemClients[indexOfExisting] = newClient;
   } else {
+    // Else, just add it to the array
     connectedSemClients.push(newClient);
   }
 
@@ -46,31 +58,68 @@ function handleSemClientConnected(message) {
   console.log(connectedSemClients);
 }
 
+/**
+ * Handles when a semclient disconnects from the system.
+ * Removes its id from the array of connected clients
+ * 
+ * @param message The message from the semclient, containing its name 
+ */
 function handleSemClientDisconnected(message) {
   var disconnectedClient = JSON.parse(message.toString());
   console.log(disconnectedClient.name + ' is disconnecting.');
 
   // Check if its in the connected array and delete it
-  let existingClient = connectedSemClients.find(x => x.name === disconnectedClient.name);
-  if(existingClient && existingClient != undefined) {
-    let index = connectedSemClients.indexOf(existingClient);
-    connectedSemClients.splice(index, index+1); // Remove from array
+  if(checkExistingClient(disconnectedClient)) {
+    console.log('Check passed');
+    console.log(disconnectedClient);
+    let indexOfExisting = connectedSemClients.indexOf(disconnectedClient);
+    console.log(indexOfExisting);
+    connectedSemClients.splice(indexOfExisting, indexOfExisting+1); // Remove from array
   }
 
   console.log('Now I have:');
   console.log(connectedSemClients);
 }
 
+/**
+ * Handle getting a state update from one of the semclients
+ * Pass it on to the other semclients 
+ * 
+ * @param message The message from the semclient, containing its state
+ */
 function handleSemClientState(message) {
   var clientStateInfo = JSON.parse(message.toString());
 
   console.log('Client ' + clientStateInfo.clientInfo.name + ' updated its state to %s', clientStateInfo.clientState + '. I will now tell the others.');
-  client.publish('sem_client/other_state', clientStateInfo.clientState);
+  controller.publish('sem_client/other_state', clientStateInfo.clientState);
 }
 
+/**
+ * Handle getting a data update from one of the semclients
+ * At the moment, do nothing with that info
+ * 
+ * @param message The message from the semclient, containing its data
+ */
 function handleSemClientData(message) {
   var clientDataInfo = JSON.parse(message.toString());
   console.log('Got data from ' + clientDataInfo.clientInfo.name + '. It is: ' + clientDataInfo.clientData);
 }
 
-module.exports.controller = client;
+/**
+ * Check if a semclient is already in the array of connected clients
+ * 
+ * @param clientData The data of the semclient to check
+ * @return {boolean} True if already in array, false if not
+ */
+function checkExistingClient(clientData) {
+
+  let existingClient = connectedSemClients.find(x => x.name === clientData.name);
+
+  if(existingClient && existingClient != undefined) {
+    return true;
+  }
+
+  return false;
+}
+
+module.exports.controller = controller;
