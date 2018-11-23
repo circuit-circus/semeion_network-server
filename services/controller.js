@@ -70,10 +70,7 @@ function handleSemClientDisconnected(message) {
 
   // Check if its in the connected array and delete it
   if(checkExistingClient(disconnectedClient)) {
-    console.log('Check passed');
-    console.log(disconnectedClient);
-    let indexOfExisting = connectedSemClients.indexOf(disconnectedClient);
-    console.log(indexOfExisting);
+    let indexOfExisting = connectedSemClients.findIndex(x => x.clientId == disconnectedClient.clientId);
     connectedSemClients.splice(indexOfExisting, indexOfExisting+1); // Remove from array
   }
 
