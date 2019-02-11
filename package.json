@@ -4,7 +4,7 @@
   "description": "Server for communication on the semeion network",
   "main": "broker.js",
   "scripts": {
-    "start": "node broker.js"
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",
