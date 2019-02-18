@@ -15,6 +15,7 @@ controller.on('connect', () => {
   controller.subscribe('sem_client/disconnect');
   controller.subscribe('sem_client/data');
   controller.subscribe('sem_client/climax');
+  controller.subscribe('sem_client/state');
 });
 
 /**
@@ -31,6 +32,8 @@ controller.on('message', (topic, message) => {
       return handleSemClientData(message);
     case 'sem_client/climax':
       return handleSemClientClimax(message);
+    case 'sem_client/state':
+      return handleSemClientState(message);
   }
   console.log('No handler for topic %s', topic);
 });
@@ -89,6 +92,19 @@ function handleSemClientClimax(message) {
 
   if(clientStateInfo.clientState) console.log('Client ' + clientStateInfo.clientInfo.name + ' updated its climax to %s', clientStateInfo.clientState + '. I will now tell the others.');
   controller.publish('sem_client/other_climax', clientStateInfo.clientState + '');
+}
+
+/**
+ * Handle getting a state update from one of the semclients
+ * Pass it on to the other semclients 
+ * 
+ * @param message The message from the semclient, containing its climax status
+ */
+function handleSemClientState(message) {
+  var clientStateInfo = JSON.parse(message.toString());
+
+  if(clientStateInfo.clientState) console.log('Client ' + clientStateInfo.clientInfo.name + ' updated its state to %s', clientStateInfo.clientState + '. I will now tell the others.');
+  controller.publish('sem_client/other_state', clientStateInfo.clientState);
 }
 
 /**
